@@ -72,6 +72,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* <Route
+  path="/admin"
+  element={
+    <ProtectedRoute>
+      <AdminRoute>
+        <Dashboard />
+      </AdminRoute>
+    </ProtectedRoute>
+  }
+/> */}
 
 
 

@@ -1,15 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { FaSearch, FaFacebook, FaGoogle } from "react-icons/fa";
+import { FaSearch, FaFacebook } from "react-icons/fa";
 
-import dashboardData from "../data/dashboardData";
+import { getCampaigns } from "../services/dashboardService";
 
 const MetricsTable = () => {
   const [search, setSearch] = useState("");
 
+  const [campaigns, setCampaigns] = useState([]);
+
+  useEffect(() => {
+    const loadCampaigns = async () => {
+      try {
+        const data = await getCampaigns();
+
+        setCampaigns(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadCampaigns();
+  }, []);
+
   // Search Filter
-  const filteredData = dashboardData.filter((item) =>
-    item.campaign.toLowerCase().includes(search.toLowerCase()),
+  const filteredData = campaigns.filter((item) =>
+    item.campaign_name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -272,7 +288,7 @@ const MetricsTable = () => {
           <tbody>
             {filteredData.map((item) => (
               <tr
-                key={item.id}
+                key={item.campaign_id}
                 className="
                     border-t border-slate-100
 
@@ -290,31 +306,15 @@ const MetricsTable = () => {
                   >
                     {/* ICON */}
                     <div
-                      className={`
-                          w-11 h-11
-
-                          rounded-xl
-
-                          flex items-center justify-center
-
-                          text-white
-
-                          ${
-                            item.platform === "Meta Ads"
-                              ? `
-                                bg-indigo-500
-                              `
-                              : `
-                                bg-red-500
-                              `
-                          }
-                        `}
+                      className="
+    w-11 h-11
+    rounded-xl
+    bg-indigo-500
+    flex items-center justify-center
+    text-white
+  "
                     >
-                      {item.platform === "Meta Ads" ? (
-                        <FaFacebook />
-                      ) : (
-                        <FaGoogle />
-                      )}
+                      <FaFacebook />
                     </div>
 
                     {/* NAME */}
@@ -325,7 +325,7 @@ const MetricsTable = () => {
                             text-slate-900
                           "
                       >
-                        {item.platform}
+                        Meta Ads
                       </h3>
 
                       <p
@@ -349,7 +349,7 @@ const MetricsTable = () => {
                           text-slate-900
                         "
                     >
-                      {item.campaign}
+                      {item.campaign_name}
                     </h3>
 
                     <p
@@ -375,7 +375,7 @@ const MetricsTable = () => {
                       text-slate-700
                     "
                 >
-                  {item.impressions.toLocaleString()}
+                  {Number(item.impressions).toLocaleString()}
                 </td>
 
                 {/* REACH */}
@@ -386,7 +386,7 @@ const MetricsTable = () => {
                       text-slate-600
                     "
                 >
-                  {item.reach.toLocaleString()}
+                  {Number(item.reach).toLocaleString()}
                 </td>
 
                 {/* CLICKS */}
@@ -397,7 +397,7 @@ const MetricsTable = () => {
                       text-slate-600
                     "
                 >
-                  {item.clicks.toLocaleString()}
+                  {Number(item.clicks).toLocaleString()}
                 </td>
 
                 {/* LEADS */}
@@ -416,7 +416,7 @@ const MetricsTable = () => {
                         font-semibold
                       "
                   >
-                    {item.leads} Leads
+                    N/A
                   </span>
                 </td>
 
@@ -430,7 +430,7 @@ const MetricsTable = () => {
                       text-slate-900
                     "
                 >
-                  ₹ {item.spend.toLocaleString()}
+                  ₹ {Number(item.spend).toLocaleString()}
                 </td>
 
                 {/* CPC */}
@@ -441,7 +441,7 @@ const MetricsTable = () => {
                       text-slate-600
                     "
                 >
-                  ₹ {item.cpc}
+                  ₹ {Number(item.cpc).toFixed(2)}
                 </td>
 
                 {/* CTR */}
@@ -460,7 +460,7 @@ const MetricsTable = () => {
                         font-semibold
                       "
                   >
-                    {item.ctr}
+                    {Number(item.ctr).toFixed(2)}%
                   </span>
                 </td>
               </tr>

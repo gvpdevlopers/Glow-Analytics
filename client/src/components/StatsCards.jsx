@@ -1,4 +1,6 @@
-import dashboardData from "../data/dashboardData";
+import { useEffect, useState } from "react";
+
+import { getStats } from "../services/dashboardService";
 
 import {
   FaEye,
@@ -9,34 +11,40 @@ import {
 } from "react-icons/fa";
 
 const StatsCards = () => {
-  // TOTAL IMPRESSIONS
-  const totalImpressions = dashboardData.reduce(
-    (acc, item) => acc + item.impressions,
-    0,
-  );
+  const [statsData, setStatsData] = useState({
+    totalImpressions: 0,
+    totalReach: 0,
+    totalClicks: 0,
+    totalSpend: 0,
+  });
 
-  // TOTAL LEADS
-  const totalLeads = dashboardData.reduce((acc, item) => acc + item.leads, 0);
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const data = await getStats();
 
-  // TOTAL CLICKS
-  const totalClicks = dashboardData.reduce((acc, item) => acc + item.clicks, 0);
+        setStatsData(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
-  // TOTAL SPEND
-  const totalSpend = dashboardData.reduce((acc, item) => acc + item.spend, 0);
+    loadStats();
+  }, []);
 
   // STATS ARRAY
   const stats = [
     {
       title: "Impressions",
-      value: totalImpressions.toLocaleString(),
+      value: statsData.totalImpressions.toLocaleString(),
       icon: <FaEye />,
       color: "from-cyan-500 to-blue-500",
       growth: "+18%",
     },
 
     {
-      title: "Total Leads",
-      value: totalLeads,
+      title: "Reach",
+      value: statsData.totalReach.toLocaleString(),
       icon: <FaUserFriends />,
       color: "from-emerald-500 to-green-500",
       growth: "+12%",
@@ -44,7 +52,7 @@ const StatsCards = () => {
 
     {
       title: "Link Clicks",
-      value: totalClicks.toLocaleString(),
+      value: statsData.totalReach.toLocaleString(),
       icon: <FaMousePointer />,
       color: "from-violet-500 to-indigo-500",
       growth: "+9%",
@@ -52,7 +60,7 @@ const StatsCards = () => {
 
     {
       title: "Ad Spend",
-      value: `₹ ${totalSpend.toLocaleString()}`,
+      value: `₹ ${Number(statsData.totalSpend).toLocaleString()}`,
       icon: <FaWallet />,
       color: "from-orange-500 to-red-500",
       growth: "+22%",

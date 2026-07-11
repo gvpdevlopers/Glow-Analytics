@@ -1,5 +1,4 @@
 const User = require("../models/User");
-
 const bcrypt = require("bcryptjs");
 
 
@@ -35,6 +34,8 @@ exports.createUser = async (req, res) => {
       email,
       password,
       role,
+      businessName,
+      campaignIds,
     } = req.body;
 
 
@@ -68,6 +69,8 @@ exports.createUser = async (req, res) => {
       email,
       password: hashedPassword,
       role,
+      businessName,
+      campaignIds: campaignIds || [],
     });
 
 
@@ -80,6 +83,8 @@ exports.createUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        businessName: user.businessName,
+        campaignIds: user.campaignIds,
       },
     });
 
@@ -121,6 +126,16 @@ exports.updateUser = async (req, res) => {
     user.role =
       req.body.role || user.role;
 
+    user.businessName =
+      req.body.businessName || user.businessName;
+
+
+
+    // Update Campaign IDs
+    if (Array.isArray(req.body.campaignIds)) {
+      user.campaignIds = req.body.campaignIds;
+    }
+
 
 
     // Update password only if entered
@@ -148,6 +163,8 @@ exports.updateUser = async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
+        businessName: updatedUser.businessName,
+        campaignIds: updatedUser.campaignIds,
       },
     });
 

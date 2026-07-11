@@ -42,9 +42,16 @@ const Users = () => {
   };
 
   // Filter Users
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filteredUsers = users.filter((user) => {
+    const searchValue = search.toLowerCase();
+
+    return (
+      user.name?.toLowerCase().includes(searchValue) ||
+      user.email?.toLowerCase().includes(searchValue) ||
+      user.businessName?.toLowerCase().includes(searchValue) ||
+      user.role?.toLowerCase().includes(searchValue)
+    );
+  });
 
   return (
     <AdminLayout>
@@ -286,6 +293,20 @@ const Users = () => {
 
                 <th
                   className="
+    px-8 py-5
+    text-left
+
+    text-sm
+    font-semibold
+
+    text-slate-500
+  "
+                >
+                  Business
+                </th>
+
+                <th
+                  className="
                     px-8 py-5
                     text-left
 
@@ -370,13 +391,12 @@ const Users = () => {
 
                         <p
                           className="
-                              text-sm
-                              text-slate-500
-
-                              mt-1
-                            "
+    text-sm
+    text-slate-500
+    mt-1
+  "
                         >
-                          Dashboard User
+                          {user.businessName || "No Business Assigned"}
                         </p>
                       </div>
                     </div>
@@ -391,6 +411,17 @@ const Users = () => {
                       "
                   >
                     {user.email}
+                  </td>
+
+                  {/* BUSINESS */}
+                  <td
+                    className="
+    px-8 py-6
+
+    text-slate-600
+  "
+                  >
+                    {user.businessName || "-"}
                   </td>
 
                   {/* ROLE */}

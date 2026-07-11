@@ -1,6 +1,13 @@
 import { useState } from "react";
 
-import { FaUser, FaEnvelope, FaLock, FaUserTag, FaPlus } from "react-icons/fa";
+import {
+  FaUser,
+  FaEnvelope,
+  FaLock,
+  FaUserTag,
+  FaPlus,
+  FaBuilding,
+} from "react-icons/fa";
 
 import AdminLayout from "../layouts/AdminLayout";
 
@@ -9,9 +16,11 @@ import { createUser } from "../services/userService";
 const CreateUser = () => {
   const [formData, setFormData] = useState({
     name: "",
+    businessName: "",
     email: "",
     password: "",
     role: "client",
+    campaignIds: "",
   });
 
   // Handle Change
@@ -27,16 +36,25 @@ const CreateUser = () => {
     e.preventDefault();
 
     try {
-      await createUser(formData);
+      await createUser({
+        ...formData,
+
+        campaignIds: formData.campaignIds
+          .split(",")
+          .map((id) => id.trim())
+          .filter(Boolean),
+      });
 
       alert("User created successfully");
 
       // Reset Form
       setFormData({
         name: "",
+        businessName: "",
         email: "",
         password: "",
         role: "client",
+        campaignIds: "",
       });
     } catch (error) {
       alert(error.response?.data?.message);
@@ -249,6 +267,103 @@ const CreateUser = () => {
                 "
               />
             </div>
+          </div>
+
+          {/* BUSINESS NAME */}
+          <div>
+            <label
+              className="
+      block
+      text-sm
+      font-semibold
+      text-slate-700
+      mb-3
+    "
+            >
+              Business Name
+            </label>
+
+            <div className="relative">
+              {/* ICON */}
+              <div
+                className="
+        absolute left-5 top-1/2
+        -translate-y-1/2
+        text-slate-400
+      "
+              >
+                <FaBuilding />
+              </div>
+
+              <input
+                type="text"
+                name="businessName"
+                placeholder="Enter business name"
+                value={formData.businessName}
+                onChange={handleChange}
+                className="
+        w-full
+        border border-slate-200
+        rounded-2xl
+        py-4
+        pl-14
+        pr-5
+        outline-none
+        focus:ring-4
+        focus:ring-cyan-500/10
+        focus:border-cyan-400
+        transition-all duration-300
+      "
+              />
+            </div>
+          </div>
+
+          {/* CAMPAIGN IDS */}
+          <div>
+            <label
+              className="
+      block
+      text-sm
+      font-semibold
+      text-slate-700
+      mb-3
+    "
+            >
+              Campaign IDs
+            </label>
+
+            <textarea
+              name="campaignIds"
+              rows={4}
+              placeholder="Enter campaign IDs separated by commas"
+              value={formData.campaignIds}
+              onChange={handleChange}
+              className="
+      w-full
+
+      border border-slate-200
+
+      rounded-2xl
+
+      py-4
+      px-5
+
+      outline-none
+
+      focus:ring-4
+      focus:ring-cyan-500/10
+
+      focus:border-cyan-400
+
+      transition-all duration-300
+    "
+            />
+
+            <p className="text-sm text-slate-500 mt-2">
+              Example:
+              <br />
+              120240662459870379, 120246585798350379
+            </p>
           </div>
 
           {/* EMAIL */}

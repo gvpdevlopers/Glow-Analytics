@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../layouts/AdminLayout";
 
 import { getUsers } from "../services/userService";
+import { getCampaigns } from "../services/dashboardService";
 
 import {
   FaUsers,
@@ -15,6 +16,7 @@ import {
 
 const Admin = () => {
   const [users, setUsers] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
 
   // Fetch Users
   useEffect(() => {
@@ -26,6 +28,9 @@ const Admin = () => {
       } catch (error) {
         console.log(error);
       }
+
+      const campaignData = await getCampaigns();
+      setCampaigns(campaignData);
     };
 
     fetchUsers();
@@ -55,20 +60,20 @@ const Admin = () => {
     },
 
     {
-      title: "Meta Accounts",
-      value: 12,
+      title: "Meta Campaigns",
+      value: campaigns.length,
       icon: <FaFacebook />,
       color: "from-indigo-500 to-violet-500",
       growth: "+15%",
     },
 
-    {
-      title: "Google Ads",
-      value: 8,
-      icon: <FaGoogle />,
-      color: "from-red-500 to-orange-500",
-      growth: "+5%",
-    },
+    // {
+    //   title: "Google Ads",
+    //   value: 8,
+    //   icon: <FaGoogle />,
+    //   color: "from-red-500 to-orange-500",
+    //   growth: "+5%",
+    // },
   ];
 
   return (

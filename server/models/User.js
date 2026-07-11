@@ -25,12 +25,16 @@ const userSchema =
         default: "client",
       },
 
-
-
       // BUSINESS NAME
       businessName: {
         type: String,
         default: "",
+      },
+
+      // ASSIGNED META CAMPAIGNS
+      campaignIds: {
+        type: [String],
+        default: [],
       },
     },
 
@@ -39,8 +43,7 @@ const userSchema =
     }
   );
 
-module.exports = User = mongoose.model(
+module.exports = mongoose.model(
   "User",
   userSchema
 );
-

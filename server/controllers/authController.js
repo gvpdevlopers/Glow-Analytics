@@ -3,7 +3,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 
-// Generate JWT Token
+// =========================================
+// GENERATE JWT TOKEN
+// =========================================
 const generateToken = (id, role) => {
   return jwt.sign(
     { id, role },
@@ -16,13 +18,27 @@ const generateToken = (id, role) => {
 
 
 
+// =========================================
 // REGISTER USER
+// =========================================
 exports.registerUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+
+    const {
+      name,
+      email,
+      password,
+      role,
+      businessName,
+      campaignIds,
+    } = req.body;
+
+
 
     // Check if user already exists
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({
+      email,
+    });
 
     if (userExists) {
       return res.status(400).json({
@@ -30,39 +46,69 @@ exports.registerUser = async (req, res) => {
       });
     }
 
-    // Hash password
+
+
+    // Hash Password
     const salt = await bcrypt.genSalt(10);
 
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword =
+      await bcrypt.hash(password, salt);
 
-    // Create new user
+
+
+    // Create User
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
       role,
+      businessName,
+      campaignIds,
     });
+
+
 
     res.status(201).json({
       message: "User registered successfully",
-      user,
+
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        businessName: user.businessName,
+        campaignIds: user.campaignIds,
+      },
     });
+
   } catch (error) {
+
     res.status(500).json({
       message: error.message,
     });
+
   }
 };
 
 
 
+// =========================================
 // LOGIN USER
+// =========================================
 exports.loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
 
-    // Find user using email
-    const user = await User.findOne({ email });
+    const {
+      email,
+      password,
+    } = req.body;
+
+
+
+    // Find User
+    const user = await User.findOne({
+      email,
+    });
 
     if (!user) {
       return res.status(400).json({
@@ -70,11 +116,14 @@ exports.loginUser = async (req, res) => {
       });
     }
 
-    // Compare passwords
-    const isMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
+
+
+    // Compare Password
+    const isMatch =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
 
     if (!isMatch) {
       return res.status(400).json({
@@ -82,11 +131,15 @@ exports.loginUser = async (req, res) => {
       });
     }
 
-    // Generate JWT token
+
+
+    // Generate Token
     const token = generateToken(
       user._id,
       user.role
     );
+
+
 
     res.status(200).json({
       message: "Login successful",
@@ -98,11 +151,16 @@ exports.loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        businessName: user.businessName,
+        campaignIds: user.campaignIds,
       },
     });
+
   } catch (error) {
+
     res.status(500).json({
       message: error.message,
     });
+
   }
 };

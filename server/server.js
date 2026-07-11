@@ -2,35 +2,85 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 
-const connectDB = require("./config/db");
-
+// ==========================================
+// LOAD ENV VARIABLES
+// ==========================================
 dotenv.config();
 
+
+const connectDB = require("./config/db");
+
+const {
+  validateMetaConfig,
+} = require("./config/metaConfig");
+
+
+
+
+// ==========================================
+// VALIDATE META CONFIG
+// ==========================================
+validateMetaConfig();
+
+
+// ==========================================
+// CONNECT DATABASE
+// ==========================================
 connectDB();
 
+
+// ==========================================
+// INITIALIZE EXPRESS
+// ==========================================
 const app = express();
 
 
-// Middleware
+// ==========================================
+// MIDDLEWARE
+// ==========================================
 app.use(cors());
 
 app.use(express.json());
 
 
-// Routes
-app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/users", require("./routes/userRoutes"));
-app.use("/api/dashboard", require("./routes/dashboardRoutes.js"));
+// ==========================================
+// ROUTES
+// ==========================================
+app.use(
+  "/api/auth",
+  require("./routes/authRoutes")
+);
+
+app.use(
+  "/api/users",
+  require("./routes/userRoutes")
+);
+
+app.use(
+  "/api/dashboard",
+  require("./routes/dashboardRoutes")
+);
 
 
-// Test Route
+// ==========================================
+// HEALTH CHECK
+// ==========================================
 app.get("/", (req, res) => {
-  res.send("API Running");
+  res.json({
+    success: true,
+    message: "GlowAnalytics API is running 🚀",
+  });
 });
 
 
-const PORT = process.env.PORT || 5000;
+// ==========================================
+// START SERVER
+// ==========================================
+const PORT =
+  process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(
+    `🚀 Server running on port ${PORT}`
+  );
 });

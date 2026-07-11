@@ -1,228 +1,230 @@
-const Campaign = require(
-  "../models/Campaign"
-);
-
+const {
+  testConnection,
+  getCampaigns: getMetaCampaigns,
+  getInsights,
+} = require("../services/metaService");
 
 
 // =========================================
-// GET ALL CAMPAIGNS
+// TEST META CONNECTION
 // =========================================
-const getCampaigns =
-  async (req, res) => {
+const testMeta = async (req, res) => {
+  try {
 
-    try {
+    const data = await testConnection();
 
-      let campaigns;
+    res.status(200).json({
+      success: true,
+      data,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
 
 
+// =========================================
+// GET META CAMPAIGNS
+// =========================================
+const getMetaCampaignsController = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const campaigns =
+      await getMetaCampaigns();
+
+    res.status(200).json({
+      success: true,
+      campaigns,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+
+};
 
 
+// =========================================
+// GET META INSIGHTS
+// =========================================
+const getMetaInsights = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const insights =
+      await getInsights();
+
+      console.log(insights);
+
+    res.status(200).json({
+      success: true,
+      insights,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+
+};
 
 
-      // ADMIN
-      if (
-        req.user.role === "admin"
-      ) {
+// =========================================
+// GET LIVE CAMPAIGNS
+// =========================================
+const getCampaigns = async (
+  req,
+  res
+) => {
 
-        campaigns =
-          await Campaign.find()
+  try {
 
-            .populate(
-              "clientId",
-              "name businessName"
+    let campaigns =
+      await getInsights();
+
+    // Client sees only assigned campaigns
+    if (
+      req.user.role === "client"
+    ) {
+
+      campaigns =
+        campaigns.filter(
+          (campaign) =>
+            req.user.campaignIds.includes(
+              campaign.campaign_id
             )
+        );
 
-            .sort({
-              createdAt: -1,
-            });
-      }
-
-
-
-
-
-
-      // CLIENT
-      else {
-
-        campaigns =
-          await Campaign.find({
-
-            clientId:
-              req.user.id,
-
-          }).sort({
-            createdAt: -1,
-          });
-      }
-
-
-
-
-
-
-      res.status(200).json(
-        campaigns
-      );
-
-    } catch (error) {
-
-      res.status(500).json({
-
-        message:
-          "Failed to fetch campaigns",
-
-      });
     }
-  };
 
+    res.status(200).json(campaigns);
 
+  } catch (error) {
 
+    res.status(500).json({
 
+      success: false,
 
+      message: error.message,
 
+    });
 
+  }
 
+};
 
 
 // =========================================
 // GET DASHBOARD STATS
 // =========================================
-const getStats =
-  async (req, res) => {
+const getStats = async (
+  req,
+  res
+) => {
 
-    try {
+  try {
 
-      let campaigns;
+    
 
+    let insights =
+      await getInsights();
 
+      console.log("Insights:", insights);
 
+    // Client sees only assigned campaigns
+    if (
+      req.user.role === "client"
+    ) {
 
-
-
-      // ADMIN
-      if (
-        req.user.role === "admin"
-      ) {
-
-        campaigns =
-          await Campaign.find();
-      }
-
-
-
-
-
-
-      // CLIENT
-      else {
-
-        campaigns =
-          await Campaign.find({
-
-            clientId:
-              req.user.id,
-
-          });
-      }
-
-
-
-
-
-
-
-      // TOTAL IMPRESSIONS
-      const totalImpressions =
-        campaigns.reduce(
-
-          (acc, item) =>
-            acc +
-            item.impressions,
-
-          0
+      insights =
+        insights.filter(
+          (campaign) =>
+            req.user.campaignIds.includes(
+              campaign.campaign_id
+            )
         );
 
-
-
-
-
-
-      // TOTAL LEADS
-      const totalLeads =
-        campaigns.reduce(
-
-          (acc, item) =>
-            acc +
-            item.leads,
-
-          0
-        );
-
-
-
-
-
-
-      // TOTAL CLICKS
-      const totalClicks =
-        campaigns.reduce(
-
-          (acc, item) =>
-            acc +
-            item.clicks,
-
-          0
-        );
-
-
-
-
-
-
-      // TOTAL SPEND
-      const totalSpend =
-        campaigns.reduce(
-
-          (acc, item) =>
-            acc +
-            item.spend,
-
-          0
-        );
-
-
-
-
-
-
-
-      res.status(200).json({
-
-        totalImpressions,
-
-        totalLeads,
-
-        totalClicks,
-
-        totalSpend,
-
-      });
-
-    } catch (error) {
-
-      res.status(500).json({
-
-        message:
-          "Failed to fetch stats",
-
-      });
     }
-  };
 
+    const totalImpressions =
+      insights.reduce(
+        (sum, item) =>
+          sum +
+          Number(item.impressions || 0),
+        0
+      );
 
+    const totalReach =
+      insights.reduce(
+        (sum, item) =>
+          sum +
+          Number(item.reach || 0),
+        0
+      );
 
+    const totalClicks =
+      insights.reduce(
+        (sum, item) =>
+          sum +
+          Number(item.clicks || 0),
+        0
+      );
 
+    const totalSpend =
+      insights.reduce(
+        (sum, item) =>
+          sum +
+          Number(item.spend || 0),
+        0
+      );
+
+    res.status(200).json({
+
+      totalImpressions,
+
+      totalReach,
+
+      totalClicks,
+
+      totalSpend,
+
+    });
+
+  } catch (error) {
+  console.error("Dashboard Error:", error);
+
+  if (!res.headersSent) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      stack: error.stack,
+    });
+  }
+}
+
+  }
 
 
 module.exports = {
@@ -230,5 +232,11 @@ module.exports = {
   getCampaigns,
 
   getStats,
+
+  testMeta,
+
+  getMetaCampaignsController,
+
+  getMetaInsights,
 
 };
